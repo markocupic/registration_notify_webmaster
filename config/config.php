@@ -18,5 +18,5 @@
 /**
  * Hooks
  */
-$GLOBALS['TL_HOOKS']['createNewUser'][] = array('RegistrationNotifyWebmaster', 'informWebmaster');
+$GLOBALS['TL_HOOKS']['createNewUser'][] = array('RegistrationNotifyWebmaster', 'notifyWebmaster');
 

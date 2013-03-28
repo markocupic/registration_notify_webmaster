@@ -34,7 +34,7 @@ class RegistrationNotifyWebmaster extends \Frontend
         * @param array
         * @param object 
         */
-       public function informWebmaster($intId, $arrData, $objModule)
+       public function notifyWebmaster($intId, $arrData, $objModule)
        {
               // Inform admin 
               if ($objModule->reg_notifyWebmaster && strlen(trim($objModule->reg_notifyWebmasterEmail)))
@@ -44,7 +44,7 @@ class RegistrationNotifyWebmaster extends \Frontend
        }
 
        /**
-        * Send webmaster notification e-mail
+        * Send webmaster notification
         * @param integer
         * @param array
         * @param object
@@ -84,12 +84,12 @@ class RegistrationNotifyWebmaster extends \Frontend
                      
                      $v = deserialize($v);
                      
-                     // get the newsletter title from tl_newsletter_channel
+                     // Get title from tl_newsletter_channel
                      if ($k == 'newsletter' && is_array($v))
                      {
                             foreach ($v as $key => $newsletterId)
                             {
-                            $v[$key] = $this->getNameFromId($newsletterId, 'newsletter');
+                            $v[$key] = $this->getTitleFromId($newsletterId, 'newsletter_channel');
                             }
                      }
               
@@ -102,7 +102,7 @@ class RegistrationNotifyWebmaster extends \Frontend
                      $strData .= $GLOBALS['TL_LANG']['tl_member'][$k][0] . ': ' . (is_array($v) ? implode(', ', $v) : $v) . chr(13) . chr(10);
               }
               
-              // set the email body
+              // Set the email body
               $objEmail->text = sprintf($GLOBALS['TL_LANG']['MSC']['adminText'], $intId, $strData . chr(13) . chr(10)) . chr(13) . chr(10);
               
               // Send the email
@@ -113,27 +113,26 @@ class RegistrationNotifyWebmaster extends \Frontend
        }
        
        /**
-        * get name from id
+        * get title from id
         * @param integer
-        * @param array
+        * @param string
         * @return string|int
         */
-       protected function getNameFromId($intId, $strTable)
+       protected function getTitleFromId($intId, $strTable)
        {
               switch ($strTable)
               {
-                     case 'newsletter':
-                            $objDb = \Database::getInstance()->prepare('SELECT * FROM tl_newsletter_channel WHERE id=?')->execute($intId);
-                            if ($objDb->next())
+                     case 'newsletter_channel':
+                            $objDb = \NewsletterChannelModel::findByPk($intId);
+                            if ($objDb !== null)
                             {
-                            return $objDb->title;
-                            } else {
-                            return $intId;
+                                   return $objDb->title;
                             }
                             break;
                      
                      default:
                             return $intId;
               }
+              return $intId;
        }
 }

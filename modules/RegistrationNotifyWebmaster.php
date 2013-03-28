@@ -116,7 +116,7 @@ class RegistrationNotifyWebmaster extends \Frontend
         * get title from id
         * @param integer
         * @param string
-        * @return string|int
+        * @return string|integer
         */
        protected function getTitleFromId($intId, $strTable)
        {

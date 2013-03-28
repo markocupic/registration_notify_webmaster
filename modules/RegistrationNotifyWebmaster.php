@@ -28,80 +28,79 @@ namespace MCupic;
  */
 class RegistrationNotifyWebmaster extends \Frontend
 {
-	/**
-	 * Notifiy webmaster
-	 * @param integer
-	 * @param array
-	 * @param object 
-	 */
-	public function informWebmaster($intId, $arrData, $objModule)
-	{
-		// Inform admin 
-		if ($objModule->reg_notifyWebmaster && strlen(trim($objModule->reg_notifyWebmasterEmail)))
-		{
-			$this->sendWebmasterNotification($intId, $arrData, $objModule);
-		}
-	}
+       /**
+        * Notifiy webmaster
+        * @param integer
+        * @param array
+        * @param object 
+        */
+       public function informWebmaster($intId, $arrData, $objModule)
+       {
+              // Inform admin 
+              if ($objModule->reg_notifyWebmaster && strlen(trim($objModule->reg_notifyWebmasterEmail)))
+              {
+                     $this->sendWebmasterNotification($intId, $arrData, $objModule);
+              }
+       }
 
-
-	/**
-	 * Send webmaster notification e-mail
-	 * @param integer
-	 * @param array
+       /**
+        * Send webmaster notification e-mail
+        * @param integer
+        * @param array
         * @param object
-	 */
-	protected function sendWebmasterNotification($intId, $arrData, $objModule)
-	{
+        */
+       protected function sendWebmasterNotification($intId, $arrData, $objModule)
+       {
               $objEmail = new \Email();
-
+              
               // Get the email recipients
               $arrRecipients = explode(',', trim($objModule->reg_notifyWebmasterEmail));
-		
+              
               // Set the sender 
               if ($objModule->reg_notifyWebmasterSender == 'administrator')
               {
                      $objEmail->from = $GLOBALS['TL_CONFIG']['adminEmail'];
                      $objEmail->fromName = $GLOBALS['TL_LANG']['MSC']['regNotifyWebmasterAdminName'];
-
-              } else {
+              }
+              else 
+              {
                      $objEmail->from = strlen($arrData['email']) ? $arrData['email'] : $GLOBALS['TL_ADMIN_EMAIL'];
                      $objEmail->fromName = (strlen($arrData['firstname']) && strlen($arrData['lastname'])) ?  $arrData['firstname'] . ' ' . $arrData['lastname'] : $arrData['username'];
               }
               
-		// Set the subject
+              // Set the subject
               $objEmail->subject = sprintf($GLOBALS['TL_LANG']['MSC']['adminSubject'], \Environment::get('host'));
-		
-		// Set the text
+              
+              // Set the text
               $strData = chr(13) . chr(10) . chr(13) . chr(10);
-
-		// Add user details
-		foreach ($arrData as $k=>$v)
-		{
-			if ($k == 'password' || $k == 'tstamp' || $k == 'activation')
-			{
-				continue;
-			}
+              
+              // Add user details
+              foreach ($arrData as $k=>$v)
+              {
+                     if ($k == 'password' || $k == 'tstamp' || $k == 'activation')
+                     {
+                            continue;
+                     }
                      
                      $v = deserialize($v);
                      
                      // get the newsletter title from tl_newsletter_channel
                      if ($k == 'newsletter' && is_array($v))
-       		{
+                     {
                             foreach ($v as $key => $newsletterId)
                             {
-                                   $v[$key] = $this->getNameFromId($newsletterId, 'newsletter');
+                            $v[$key] = $this->getNameFromId($newsletterId, 'newsletter');
                             }
-			}
-
-			if ($k == 'dateOfBirth' && strlen($v))
-			{
-				$v = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $v);
-			}
+                     }
+              
+                     if ($k == 'dateOfBirth' && strlen($v))
+                     {
+                            $v = $this->parseDate($GLOBALS['TL_CONFIG']['dateFormat'], $v);
+                     }
                      
                      if (!strlen($GLOBALS['TL_LANG']['tl_member'][$k][0])) continue;
-                     
-			$strData .= $GLOBALS['TL_LANG']['tl_member'][$k][0] . ': ' . (is_array($v) ? implode(', ', $v) : $v) . chr(13) . chr(10);
-		}
+                     $strData .= $GLOBALS['TL_LANG']['tl_member'][$k][0] . ': ' . (is_array($v) ? implode(', ', $v) : $v) . chr(13) . chr(10);
+              }
               
               // set the email body
               $objEmail->text = sprintf($GLOBALS['TL_LANG']['MSC']['adminText'], $intId, $strData . chr(13) . chr(10)) . chr(13) . chr(10);
@@ -110,31 +109,31 @@ class RegistrationNotifyWebmaster extends \Frontend
               $objEmail->sendTo($arrRecipients);
               
               // Write to the system-log
-		$this->log('A webmaster notification e-mail has been sent.', 'RegistrationNotifyWebmaster sendWebmasterNotification()', TL_ACCESS);
-	}
+              $this->log('A webmaster notification e-mail has been sent.', 'RegistrationNotifyWebmaster sendWebmasterNotification()', TL_ACCESS);
+       }
        
        /**
         * get name from id
-	 * @param integer
-	 * @param array
+        * @param integer
+        * @param array
         * @return string|int
-	 */
-	protected function getNameFromId($intId, $strTable)
-	{
+        */
+       protected function getNameFromId($intId, $strTable)
+       {
               switch ($strTable)
               {
                      case 'newsletter':
                             $objDb = \Database::getInstance()->prepare('SELECT * FROM tl_newsletter_channel WHERE id=?')->execute($intId);
                             if ($objDb->next())
                             {
-                                   return $objDb->title;
+                            return $objDb->title;
                             } else {
-                                   return $intId;
+                            return $intId;
                             }
                             break;
-                            
+                     
                      default:
                             return $intId;
               }
-	}
+       }
 }
